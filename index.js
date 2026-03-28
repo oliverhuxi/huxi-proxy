@@ -24,8 +24,20 @@ app.all('/shopify/*', async (req, res) => {
       },
       body: ['POST','PUT','PATCH'].includes(req.method) ? JSON.stringify(req.body) : undefined
     });
+    const text = await response.text();
+    res.status(response.status).send(text);
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/test', async (req, res) => {
+  try {
+    const response = await fetch('https://huxi.myshopify.com/admin/api/2026-01/shop.json', {
+      headers: { 'X-Shopify-Access-Token': process.env.SHOPIFY_TOKEN }
+    });
     const data = await response.json();
-    res.json(data);
+    res.json({ status: response.status, shop: data.shop?.name || 'connected' });
   } catch(e) {
     res.status(500).json({ error: e.message });
   }
